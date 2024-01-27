@@ -14,6 +14,10 @@ exports.getUserById = async (userId) => {
   return User.findByPk(userId);
 };
 
+exports.getUserByRoomId = async (roomId) => {
+  return User.findOne({ where: { roomId: roomId } });
+};
+
 exports.getUserByIdWithRole = async (userId) => {
   try {
     const user = User.findOne({
@@ -67,7 +71,6 @@ exports.registerUser = async (roomId, userData) => {
     throw new Error("Registration failed");
   }
 };
-
 exports.loginUser = async (username, password) => {
   try {
     const user = await User.findOne({
@@ -170,3 +173,38 @@ exports.registerAdmin = async (data) => {
     throw error;
   }
 };
+
+exports.checkChatId = async (chatId) => {
+  try {
+    const user = await User.findOne({ where: { chatId: chatId } });
+    if (!user) {
+      return;
+    }
+    return user;
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.registerChatId = async (chatId, phoneNumber) => {
+  try {
+    const formattedPhoneNumber = formatPhoneNumber(phoneNumber);
+    const user = await User.findOne({
+      where: { phoneNumber: formattedPhoneNumber },
+    });
+    if (!user) {
+      throw new Error("User does not exist");
+    }
+    await user.update({ chatId: chatId });
+  } catch (error) {
+    throw error;
+  }
+};
+
+function formatPhoneNumber(globalFormNumber) {
+  const numberWithoutPlus = globalFormNumber.replace(/^\+/, "");
+
+  const replacedNumber = numberWithoutPlus.replace(/^84/, "0");
+
+  return replacedNumber;
+}

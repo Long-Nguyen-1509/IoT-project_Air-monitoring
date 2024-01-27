@@ -1,5 +1,7 @@
 const mqtt = require("mqtt");
 const AirQualityService = require("../services/air-quality-service");
+const UserService = require("../services/user-service");
+const TelegramBot = require("../telegram-bot/telegram-bot");
 
 exports.startMqttListener = async (brokerUrl, clientId, topic) => {
   const mqttClient = mqtt.connect(brokerUrl, { clientId, clean: true });
@@ -31,7 +33,16 @@ exports.startMqttListener = async (brokerUrl, clientId, topic) => {
     return wildcardValue;
   };
 
-  const handleMqttMessage = (mqttTopic, message, wildcardValue) => {
+  const handleMqttMessage = async (mqttTopic, message, wildcardValue) => {
+    const jsonMessage = JSON.parse(message.toString());
+    if (jsonMessage.temperature >= 50) {
+      const user = await UserService.getUserByRoomId(parseInt(wildcardValue));
+      TelegramBot.sendMessage(
+        user.chatId,
+        `*Alert: Your room temperature is reaching over 50°C (currently ${jsonMessage.temperature}°C)*`,
+        { parse_mode: "Markdown" }
+      );
+    }
     AirQualityService.saveAirQuality(
       parseInt(wildcardValue),
       JSON.parse(message.toString())

@@ -1,9 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const routes = require("./routes/routes");
 const db = require("./models");
 const MqttHandler = require("./mqttHandler/mqttHandler");
-require("dotenv").config();
+const telegramBot = require("./telegram-bot/telegram-bot");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
