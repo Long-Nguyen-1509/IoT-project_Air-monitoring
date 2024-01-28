@@ -31,7 +31,13 @@ bot.onText(/\/start/, async (msg) => {
 bot.on("contact", async (msg) => {
   const chatId = msg.chat.id;
   const phoneNumber = msg.contact.phone_number;
-  await UserService.registerChatId(chatId, phoneNumber);
+  const user = await UserService.registerChatId(chatId, phoneNumber);
+  if (!user) {
+    bot.sendMessage(
+      chatId,
+      "Your phone number is not registered with any room in our system. Please check again or contact the administrator."
+    );
+  }
   bot.sendMessage(
     chatId,
     `Thank you for sharing your contact! Phone number: ${phoneNumber}. Type /help to see command options`
@@ -42,7 +48,7 @@ bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
   bot.sendMessage(
     chatId,
-    "Type /now to see the lastest air quality parameters\n" +
+    "Type /now to see the latest air quality parameters\n" +
       "Type /avg to see the average air quality parameters in the last 24 hours"
   );
 });
